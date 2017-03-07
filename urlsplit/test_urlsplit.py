@@ -1,18 +1,5 @@
 import unittest
-
-
-def parse_url(url):
-    class UrlObject():
-        def __init__(self, protocol, site, path):
-            self.protocol = protocol
-            self.site = site
-            self.path = path
-
-    site = url.split('//')[1]
-    path = url.split('/')[-1]
-    if url[0] == 'h':
-        return UrlObject('http', site, path)
-    return UrlObject('ftp', site, path)
+from parse_url import parse_url
 
 
 class test_basic_example(unittest.TestCase):
@@ -27,6 +14,8 @@ class test_basic_example(unittest.TestCase):
     def test_finds_ftp_protocol(self):
         self.assertProtocol('ftp://www.site.com', 'ftp')
 
+    def test_finds_custom_protocol(self):
+        self.assertProtocol('custom://www.site.com', 'custom')
 
 class test_site_parsing(unittest.TestCase):
     def assertSite(self, url, expect_site):
@@ -43,14 +32,18 @@ class test_site_parsing(unittest.TestCase):
 
 class test_path_parsing(unittest.TestCase):
     def assertPath(self, url, expect_path):
-        url_object = parse_url('http://www.com/')
-        path = url_object.path
-        self.assertEqual("", path)
+        url_object = parse_url(url)
+        actual_path = url_object.path
+        self.assertEqual(expect_path, actual_path)
+
     def test_empty_path(self):
         self.assertPath('http://www.com/', "")
+
     def test_empty_path_with_no_slash_end(self):
         self.assertPath('http://www.com', "")
-    def test_single_work_path(self):
-        self.assertPath('http://www.com/', "word")
+
+    def test_single_word_path(self):
+        self.assertPath('http://www.com/word', "word")
+
     def test_long_path(self):
-        self.assertPath('http://www.com/word-some/path.txt', )
+        self.assertPath('http://www.com/word-some/path.txt', "word-some/path.txt")
